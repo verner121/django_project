@@ -1,30 +1,41 @@
+from django import forms
 from django.http import HttpResponse
-from django.shortcuts import render
-
+from django.views.generic import ListView, DetailView, FormView
 from catalog.models import Product
 
 
-def home(request):
-    return render(request, 'home.html')
+class ContactForm(forms.Form):
+    name = forms.CharField()
+    phone_number = forms.CharField()
+    message = forms.CharField(widget=forms.Textarea)
 
 
-def contacts(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        phone = request.POST.get('phone')
-        message = request.POST.get('message')
-        return HttpResponse(f"Контактные данные и сообщение получены"
-                            f"Ваше имя: {name}, номер телефона: {phone}, сообщение: {message}")
-    return render(request, 'contacts.html')
+class ContactsView(FormView):
+    template_name = 'catalog/contacts.html'
+    form_class = ContactForm
+    success_url = '/contacts/'
+
+    def form_valid(self, form):
+        name = form.cleaned_data['name']
+        return HttpResponse(f'Спасибо {name}! Сообщение отправлено.')
 
 
-def product_list(request):
-    products = Product.objects.all()
-    context = {"products": products}
-    return render(request, 'catalog/product_list.html', context)
+class ProductListView(ListView):
+    model = Product
+    template_name = 'catalog/product_list.html'
+    context_object_name = 'products'
 
 
-def product_detail(request, pk):
-    product = Product.objects.get(pk=pk)
-    context = {"product": product}
-    return render(request, 'catalog/product_detail.html', context)
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'catalog/product_detail.html'
+    context_object_name = 'product'
+
+# def contacts(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         phone = request.POST.get('phone')
+#         message = request.POST.get('message')
+#         return HttpResponse(f"Контактные данные и сообщение получены"
+#                             f"Ваше имя: {name}, номер телефона: {phone}, сообщение: {message}")
+#     return render(request, 'contacts.html')

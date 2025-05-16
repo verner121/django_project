@@ -1,0 +1,24 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        <div class="col-6">
+            <div class="card shadow-sm">
+                <form class="row" method="post" enctype="multipart/form-data">
+                    <div class="card">
+                        <p class="card-text">Вы действительно хотите удалить "{{ blog.title }}" ? </p>
+                        <div class="card-body">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                <a class="btn btn-sm btn-outline-primary" href="{% url 'blog:blog_list' %}" role="button">Отмена</a>
+                            </div>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
