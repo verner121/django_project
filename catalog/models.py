@@ -1,6 +1,7 @@
 from django.db import models
 
 from users.models import User
+from django.template.defaultfilters import slugify
 
 
 class Category(models.Model):
@@ -14,6 +15,7 @@ class Category(models.Model):
         verbose_name='Описание категории',
         help_text='Напишите описание категории'
     )
+    slug = models.SlugField(null=True)
 
     class Meta:
         verbose_name = 'Категория'
@@ -21,6 +23,11 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
 
 class Product(models.Model):
@@ -40,15 +47,7 @@ class Product(models.Model):
         verbose_name='Изображение',
         help_text='Загрузите изображение товара'
     )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.CASCADE,
-        verbose_name='Категория',
-        help_text='Напишите категорию товара',
-        blank=True,
-        null=True,
-        related_name='products'
-    )
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
     price = models.IntegerField(
         default=0,
         help_text='Введите цену продукта'
@@ -65,6 +64,9 @@ class Product(models.Model):
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
         ordering = ['price', 'name', 'category']
+        indexes = [
+            models.Index(fields=["name", "category"]),
+        ]
         permissions = [
             ('can_unpublish_product', 'Can unpublish product'),
             ('can_delete_product', 'Can delete product')
